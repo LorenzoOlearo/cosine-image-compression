@@ -18,16 +18,23 @@ def cosine_transform(signal):
         cosine_signal[k] *= scaling_factor
             
     return cosine_signal
+
+
+
+def check_cosine_transform(result):
+    correct_cosine_signal = np.array([4.01e+02, 6.60e+00, 1.09e+02, -1.12e+02, 6.54e+01, 1.21e+02, 1.16e+02, 2.88e+01])
+    print('Correct cosine signal: ', correct_cosine_signal)
+    print('Result cosine signal: ', result)
+    assert np.allclose(result, correct_cosine_signal, rtol=1e-2), 'cosine tranform missmatch'
  
-    
-    
     
     
 def main():
     signal = np.array([231, 32, 233, 161, 24, 71, 140, 245])
     cosine_signal = cosine_transform(signal)
+    
+    check_cosine_transform(cosine_signal)
     print(cosine_signal)
-    print(dct(signal, norm='ortho'))
     
     
 
