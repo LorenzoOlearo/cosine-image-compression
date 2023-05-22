@@ -1,23 +1,25 @@
 import numpy as np
 from scipy.fftpack import dct, idct
 
+from test import TestCosineTransform
 
-def cosine_transform(signal):
-    N = len(signal)
-    cosine_signal = np.zeros(N)
+
+def cosine_transform(vector):
+    N = len(vector)
+    cosine_vector = np.zeros(N)
 
     for k in range(N):
         for n in range(N):
-            cosine_signal[k] += signal[n] * np.cos((np.pi * k * (2 * n + 1)) / (2 * N))
+            cosine_vector[k] += vector[n] * np.cos((np.pi * k * (2 * n + 1)) / (2 * N))
         
         if k == 0:
             scaling_factor = np.sqrt(1/N)
         else:
             scaling_factor = np.sqrt(2/N)
         
-        cosine_signal[k] *= scaling_factor
+        cosine_vector[k] *= scaling_factor
             
-    return cosine_signal
+    return cosine_vector
 
 
 def cosine_transform_matrix(matrix):
@@ -33,10 +35,7 @@ def cosine_transform_matrix(matrix):
 
     
 def main():
-    signal = np.array([231, 32, 233, 161, 24, 71, 140, 245])
-    cosine_signal = cosine_transform(signal)
-    print('DCT 1D:\n', cosine_signal)
-
+    vector = np.array([231, 32, 233, 161, 24, 71, 140, 245])
     matrix = np.array([[231, 32, 233, 161, 24, 71, 140, 245],
                        [247, 40, 248, 245, 124, 204, 36, 107],
                        [234, 202, 245, 167, 9, 217, 239, 173],
@@ -46,8 +45,13 @@ def main():
                        [193, 70, 174, 167, 41, 30, 127, 245],
                        [87, 149, 57, 192, 65, 129, 178, 228]])
 
+    cosine_vector = cosine_transform(vector)
     cosine_matrix = cosine_transform_matrix(matrix)
-    print('DCT 2D:\n', cosine_matrix)
+
+    test = TestCosineTransform()
+    test.check_cosine_transform_1D(cosine_vector)
+    test.check_cosine_transform_2D(cosine_matrix)
+    
 
 
     
