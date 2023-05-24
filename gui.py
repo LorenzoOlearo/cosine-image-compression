@@ -9,6 +9,8 @@ class GUI(tk.Tk):
         super().__init__()
 
         self.img = None
+        self.img_dct = None
+        self.scaling = 0
 
         self.title("cosine image compression")
 
@@ -57,12 +59,18 @@ class GUI(tk.Tk):
         image_frame.columnconfigure(1, weight=1)
         image_frame.rowconfigure(0, weight=1)
 
+        self.bind("<MouseWheel>", self.zoom)
+        self.bind("<Button-4>", self.zoom)
+        self.bind("<Button-5>", self.zoom)
+
         self.mainloop()
 
     def selectImage(self):
         path = filedialog.askopenfilename(filetypes=[("Image File", '.jpg'), ("Image File", '.png'), ("Image File", '.bmp')])
         try:
             self.img = ImageTk.PhotoImage(Image.open(path))
+            self.img_dct = None
+            self.scaling = 0
             self.canvas_original.create_image(0, 0, anchor='nw', image=self.img)
             self.canvas_label.config(text=path)
             self.canvas_dct.delete("all")
@@ -70,17 +78,57 @@ class GUI(tk.Tk):
             self.updateDctEnable(None, None, None)
         except (Exception):
             self.img = None
+            self.img_dct = None
+            self.scaling = 0
             self.canvas_label.config(text="No image selected")
             self.canvas_original.delete("all")
             self.canvas_dct.delete("all")
 
             self.updateDctEnable(None, None, None)
             
-    
+    def zoom(self, event):
+        if event.delta == 0:
+            if event.num == 4:
+                self.scaling += 1
+            elif event.num == 5:
+                self.scaling += -1
+        else:
+            self.scaling += int(event.delta/120)
+        
+        self.canvas_original.delete("all") 
+        self.canvas_dct.delete("all")
+
+        if self.scaling > 0:
+            if self.img is not None:
+                self.zoomed_img = self.img._PhotoImage__photo.zoom(self.scaling)
+                self.canvas_original.create_image(0, 0, anchor='nw', image=self.zoomed_img)
+
+            if self.img_dct is not None:
+                self.zoomed_img_dct = self.img_dct._PhotoImage__photo.zoom(self.scaling)
+                self.canvas_dct.create_image(0, 0, anchor='nw', image=self.zoomed_img_dct)
+        
+        if self.scaling < 0:
+            if self.img is not None:
+                self.zoomed_img = self.img._PhotoImage__photo.subsample(-self.scaling)
+                self.canvas_original.create_image(0, 0, anchor='nw', image=self.zoomed_img)
+
+            if self.img_dct is not None:
+                self.zoomed_img_dct = self.img_dct._PhotoImage__photo.subsample(-self.scaling)
+                self.canvas_dct.create_image(0, 0, anchor='nw', image=self.zoomed_img_dct)
+            
+        if self.scaling == 0:
+            if self.img is not None:
+                self.zoomed_img = self.img
+                self.canvas_original.create_image(0, 0, anchor='nw', image=self.zoomed_img)
+
+            if self.img_dct is not None:
+                self.zoomed_img_dct = self.img_dct
+                self.canvas_dct.create_image(0, 0, anchor='nw', image=self.zoomed_img_dct)
 
     def dct(self):
         # TODO call the dct function
-        self.canvas_dct.create_image(0, 0, anchor='nw', image=self.img)
+        self.img_dct = self.img
+        self.canvas_dct.create_image(0, 0, anchor='nw', image=self.img_dct)
 
     def isPositiveInteger(self, value):
         try:
