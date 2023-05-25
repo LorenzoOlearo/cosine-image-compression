@@ -164,6 +164,3 @@ class GUI(tk.Tk):
         else:
             self.d_entry.config(fg='red')
             self.dct_button.config(state=tk.DISABLED)
-            
-
-GUI()
