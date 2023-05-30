@@ -1,8 +1,9 @@
 import numpy as np
 import scipy.fftpack as fftpack
 import os
-from cv2 import imread
 from PIL import Image
+import matplotlib.pyplot as plt
+
 
 import jpegDCT
 import jpegUtils
@@ -26,7 +27,7 @@ class TestCosineTransform():
         self.bitmap = Image.open(os.path.join(os.path.dirname(__file__), 'images', 'deer.bmp')).convert('L')
         self.bitmap = np.array(self.bitmap)
         
-        jpegUtils.bitmap_to_jpeg(self.bitmap, 8, 0.5) 
+        
                              
                              
 
@@ -39,8 +40,9 @@ class TestCosineTransform():
         self.check_cosine_anti_transform_1D(jpegDCT.idct(cosine_vector))
         self.check_cosine_anti_transform_2D(jpegDCT.idct2(cosine_matrix))
        
-        macro_blocks = jpegDCT.bitmap_to_jpeg(self.bitmap, 8, 0.5)
-
+        compressed = jpegUtils.bitmap_to_jpeg(self.bitmap, macro_size=8, freq_cut=2, fast=True)
+        plt.imshow(compressed, cmap=plt.cm.gray)
+        plt.show()
 
 
 
