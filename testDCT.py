@@ -4,9 +4,9 @@ import os
 from PIL import Image
 import matplotlib.pyplot as plt
 
-
 import jpegDCT
 import jpegUtils
+
 
 
 class TestCosineTransform():
@@ -26,8 +26,6 @@ class TestCosineTransform():
         # Load a test bitmap image
         self.bitmap = Image.open(os.path.join(os.path.dirname(__file__), 'images', 'deer.bmp')).convert('L')
         self.bitmap = np.array(self.bitmap)
-        
-        
                              
                              
 
@@ -52,10 +50,12 @@ class TestCosineTransform():
         print('1D cosine tranform test passed!')
 
 
+
     def check_cosine_transform_2D(self, result):
         scipy_cosine_matrix = fftpack.dct(fftpack.dct(self.matrix.T, norm='ortho').T, norm='ortho')
         assert np.allclose(result, scipy_cosine_matrix, rtol=1e-3), 'Cosine tranform 2D missmatch'
         print('2D cosine tranform test passed!')
+
 
 
     def check_cosine_anti_transform_1D(self, result):
@@ -63,8 +63,8 @@ class TestCosineTransform():
         print('1D cosine anti tranform test passed!')
 
 
+
     def check_cosine_anti_transform_2D(self, result):
         assert np.allclose(result, self.matrix, rtol=1e-3), 'Cosine anti tranform 2D missmatch'
         print('2D cosine anti tranform test passed!')
-        
         

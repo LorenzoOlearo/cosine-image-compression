@@ -4,6 +4,7 @@ import scipy.fftpack as fft
 import jpegDCT
 
 
+
 def extract_macro_blocks(image, macro_size):
     macro_blocks = np.zeros((image.shape[0] // macro_size, image.shape[1] // macro_size, macro_size, macro_size))
     
@@ -12,6 +13,7 @@ def extract_macro_blocks(image, macro_size):
             macro_blocks[i, j] = image[i * macro_size : (i + 1) * macro_size, j * macro_size : (j + 1) * macro_size]
             
     return macro_blocks
+
 
 
 def frequency_cut(macro_block, freq_cut):
@@ -23,12 +25,43 @@ def frequency_cut(macro_block, freq_cut):
     return macro_block
 
 
+
 def clamp_macro_block(macro_block):
-    macro_block = np.round(macro_block) 
-    # macro_block = macro_block + 128
-    macro_block = np.clip(macro_block, 0, 255)
+    clamped_macro_block = np.round(macro_block) 
+    clamped_macro_block = np.clip(macro_block, 0, 255)
+    
+    return clamped_macro_block
+
+
+
+def dct2(macro_block, fast):
+    if fast == False:
+        dct_macro_block = jpegDCT.dct2(macro_block)
+    else:
+        dct_macro_block = fft.dct(fft.dct(macro_block, axis=0, norm='ortho'), axis=1, norm='ortho')
+    
+    return dct_macro_block
+
+
+
+def idct2(dct_macro_block, fast):
+    if fast == False:
+        macro_block = jpegDCT.idct2(dct_macro_block)
+    else:
+        macro_block = fft.idct(fft.idct(dct_macro_block, axis=0, norm='ortho'), axis=1, norm='ortho')
+        
+    return macro_block
+    
+
+
+def macro_block_compression(macro_block, freq_cut, fast):
+    macro_block = dct2(macro_block, fast)
+    macro_block = frequency_cut(macro_block, freq_cut) 
+    macro_block = idct2(macro_block, fast)
+    macro_block = clamp_macro_block(macro_block)
     
     return macro_block
+
 
 
 def recompose_macro_blocks(macro_blocks):
@@ -41,28 +74,14 @@ def recompose_macro_blocks(macro_blocks):
     return image
 
 
+
 def bitmap_to_jpeg(bitmap, macro_size, freq_cut, fast = True):
-    # bitmap = bitmap - 128
     macro_blocks = extract_macro_blocks(bitmap, macro_size)
-    dct_macro_blocks = np.zeros(macro_blocks.shape)
     compressed_macro_blocks = np.zeros(macro_blocks.shape)
 
     for i in range(macro_blocks.shape[0]):
         for j in range(macro_blocks.shape[1]):
-            
-            if fast == False:
-                dct_macro_blocks[i, j] = jpegDCT.dct2(macro_blocks[i, j])
-            else:
-                dct_macro_blocks[i, j] = fft.dct(fft.dct(macro_blocks[i, j], axis=0, norm = 'ortho'), axis=1, norm = 'ortho')
-            
-            dct_macro_blocks[i, j] = frequency_cut(dct_macro_blocks[i, j], freq_cut) 
-            
-            if fast == False:
-                compressed_macro_blocks[i, j] = jpegDCT.idct2(dct_macro_blocks[i, j])
-            else:
-                compressed_macro_blocks[i, j] = fft.idct(fft.idct(dct_macro_blocks[i, j], axis=0, norm = 'ortho'), axis=1, norm = 'ortho')
-                
-            compressed_macro_blocks[i, j] = clamp_macro_block(compressed_macro_blocks[i, j]) 
+            compressed_macro_blocks[i, j] = macro_block_compression(macro_blocks[i, j], freq_cut, fast)
             
     return recompose_macro_blocks(compressed_macro_blocks)
             

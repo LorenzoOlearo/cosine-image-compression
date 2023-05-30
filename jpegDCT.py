@@ -1,5 +1,7 @@
 import numpy as np
 
+
+
 def dct(vector):
     N = len(vector)
     cosine_vector = np.zeros(N)
@@ -18,6 +20,7 @@ def dct(vector):
     return cosine_vector
 
 
+
 def idct(vector):
     N = len(vector)
     cosine_vector = np.zeros(N)
@@ -34,6 +37,7 @@ def idct(vector):
     return cosine_vector
 
 
+
 def dct2(matrix):
     cosine_matrix = np.zeros(matrix.shape)
 
@@ -45,6 +49,7 @@ def dct2(matrix):
     return cosine_matrix
 
 
+
 def idct2(matrix):
     cosine_matrix = np.zeros(matrix.shape)
 
@@ -54,4 +59,3 @@ def idct2(matrix):
         cosine_matrix[:, i] = idct(cosine_matrix[:, i])
 
     return cosine_matrix
-
