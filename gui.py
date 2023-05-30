@@ -13,6 +13,7 @@ class GUI(tk.Tk):
         self.img = None
         self.img_dct = None
         self.scaling = 0
+        
 
         self.title("cosine image compression")
 
@@ -59,9 +60,15 @@ class GUI(tk.Tk):
         image_frame.columnconfigure(1, weight=1)
         image_frame.rowconfigure(0, weight=1)
 
-        self.bind("<MouseWheel>", self.zoom)
-        self.bind("<Button-4>", self.zoom)
-        self.bind("<Button-5>", self.zoom)
+
+        self.canvas_original.bind("<MouseWheel>", self.zoom)
+        self.canvas_original.bind("<Button-4>", self.zoom)
+        self.canvas_original.bind("<Button-5>", self.zoom)
+        self.canvas_dct.bind("<MouseWheel>", self.zoom)
+        self.canvas_dct.bind("<Button-4>", self.zoom)
+        self.canvas_dct.bind("<Button-5>", self.zoom)
+        self.bind("<Configure>", self.on_resize)
+
 
     def selectImage(self):
         path = filedialog.askopenfilename(filetypes=[("Image File", '.jpg'), ("Image File", '.png'), ("Image File", '.bmp')])
@@ -69,9 +76,7 @@ class GUI(tk.Tk):
             self.img = ImageTk.PhotoImage(Image.open(path))
             self.img_dct = None
             self.scaling = 0
-            self.canvas_original.create_image(0, 0, anchor='nw', image=self.img)
             self.canvas_label.config(text=path)
-            self.canvas_dct.delete("all")
             self.F_entry.config(state=tk.NORMAL)
             self.dct_button.config(state=tk.NORMAL)
         except (Exception):
@@ -79,12 +84,13 @@ class GUI(tk.Tk):
             self.img_dct = None
             self.scaling = 0
             self.canvas_label.config(text="No image selected")
-            self.canvas_original.delete("all")
-            self.canvas_dct.delete("all")
             self.F_entry.config(state=tk.DISABLED)
             self.dct_button.config(state=tk.DISABLED)
+        
+        self.redraw()
 
     def start(self):
+
         self.mainloop()
 
     def zoom(self, event):
@@ -96,41 +102,46 @@ class GUI(tk.Tk):
         else:
             self.scaling += int(event.delta/120)
         
+        self.redraw()
+        
+    
+    def on_resize(self, event):
+
+        self.redraw()
+
+    def redraw(self):
+
         self.canvas_original.delete("all") 
         self.canvas_dct.delete("all")
+        maxsize = (self.canvas_original.winfo_width(), self.canvas_original.winfo_height())
 
-        if self.scaling > 0:
-            if self.img is not None:
-                self.zoomed_img = self.img._PhotoImage__photo.zoom(self.scaling)
-                self.canvas_original.create_image(0, 0, anchor='nw', image=self.zoomed_img)
+        scale = 2**self.scaling
 
-            if self.img_dct is not None:
-                self.zoomed_img_dct = self.img_dct._PhotoImage__photo.zoom(self.scaling)
-                self.canvas_dct.create_image(0, 0, anchor='nw', image=self.zoomed_img_dct)
-        
-        if self.scaling < 0:
-            if self.img is not None:
-                self.zoomed_img = self.img._PhotoImage__photo.subsample(-self.scaling)
-                self.canvas_original.create_image(0, 0, anchor='nw', image=self.zoomed_img)
-
-            if self.img_dct is not None:
-                self.zoomed_img_dct = self.img_dct._PhotoImage__photo.subsample(-self.scaling)
-                self.canvas_dct.create_image(0, 0, anchor='nw', image=self.zoomed_img_dct)
+        if self.img is not None:
+            img = ImageTk.getimage(self.img)
+            if(img.width*scale > maxsize[0] or img.height*scale > maxsize[1]):
+                img = img.crop((0, 0, maxsize[0]/scale, maxsize[1]/scale))
+            img = img.resize((round(img.width*scale), round(img.height*scale)), Image.NEAREST)
             
-        if self.scaling == 0:
-            if self.img is not None:
-                self.zoomed_img = self.img
-                self.canvas_original.create_image(0, 0, anchor='nw', image=self.zoomed_img)
+            self.zoomed_img = ImageTk.PhotoImage(img)
+            self.canvas_original.create_image(0, 0, anchor='nw', image=self.zoomed_img)
+        
+        if self.img_dct is not None:
+            img = ImageTk.getimage(self.img_dct)
+            if(img.width*scale > maxsize[0] or img.height*scale > maxsize[1]):
+                img = img.crop((0, 0, maxsize[0]/scale, maxsize[1]/scale))
+            img = img.resize((round(img.width*scale), round(img.height*scale)), Image.NEAREST)
+            
+            self.zoomed_img_dct = ImageTk.PhotoImage(img)
+            self.canvas_dct.create_image(0, 0, anchor='nw', image=self.zoomed_img_dct)
 
-            if self.img_dct is not None:
-                self.zoomed_img_dct = self.img_dct
-                self.canvas_dct.create_image(0, 0, anchor='nw', image=self.zoomed_img_dct)
+
 
     def dct(self):
         # TODO call the dct function
         try:
             self.img_dct = self.controller.dct(self.img, self.F_string.get(), self.d_string.get())
-            self.canvas_dct.create_image(0, 0, anchor='nw', image=self.img_dct)
+            self.redraw()
         except:
             messagebox.showerror("Error", "Invalid input")
 
