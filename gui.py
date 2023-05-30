@@ -5,8 +5,10 @@ from PIL import Image, ImageTk
 
 class GUI(tk.Tk):
 
-    def __init__(self):
+    def __init__(self, controller):
         super().__init__()
+
+        self.controller = controller
 
         self.img = None
         self.img_dct = None
@@ -31,10 +33,10 @@ class GUI(tk.Tk):
         self.dct_button = tk.Button(control_frame, text="DCT", command=self.dct, state=tk.DISABLED)
         self.dct_button.grid(row=0, column=1)
 
-        self.F_entry = tk.Entry(control_frame)
+        self.F_string = tk.StringVar()
+        self.F_string.trace_add("write", self.updateDctEnable)
+        self.F_entry = tk.Spinbox(control_frame, from_=0, to=0, textvariable=self.F_string)
         self.F_entry.grid(row=1, column=0)
-        self.F_entry.config(validate='key', validatecommand=(self.register(self.isPositiveInteger), '%P'))
-        self.F_entry.insert(0, "8")
 
         self.d_string = tk.StringVar()
         self.d_string.trace_add("write", self.updateDctEnable)
@@ -63,7 +65,7 @@ class GUI(tk.Tk):
         self.bind("<Button-4>", self.zoom)
         self.bind("<Button-5>", self.zoom)
 
-        self.mainloop()
+        self.updateFEntryLimits(None, None, None)
 
     def selectImage(self):
         path = filedialog.askopenfilename(filetypes=[("Image File", '.jpg'), ("Image File", '.png'), ("Image File", '.bmp')])
@@ -74,8 +76,6 @@ class GUI(tk.Tk):
             self.canvas_original.create_image(0, 0, anchor='nw', image=self.img)
             self.canvas_label.config(text=path)
             self.canvas_dct.delete("all")
-
-            self.updateDctEnable(None, None, None)
         except (Exception):
             self.img = None
             self.img_dct = None
@@ -83,9 +83,13 @@ class GUI(tk.Tk):
             self.canvas_label.config(text="No image selected")
             self.canvas_original.delete("all")
             self.canvas_dct.delete("all")
-
+        finally:
+            self.updateFEntryLimits(None, None, None)
             self.updateDctEnable(None, None, None)
-            
+
+    def start(self):
+        self.mainloop()
+
     def zoom(self, event):
         if event.delta == 0:
             if event.num == 4:
@@ -127,7 +131,7 @@ class GUI(tk.Tk):
 
     def dct(self):
         # TODO call the dct function
-        self.img_dct = self.img
+        self.img_dct = self.controller.dct(self.img, int(self.F_entry.get()), int(self.d_entry.get()))
         self.canvas_dct.create_image(0, 0, anchor='nw', image=self.img_dct)
 
     def isPositiveInteger(self, value):
@@ -154,6 +158,15 @@ class GUI(tk.Tk):
         except:
             return False
 
+    def updateFEntryLimits(self, v, index, mode):
+        if self.img == None:
+            self.F_entry.config(from_=0, to=0, state=tk.DISABLED)
+            self.F_entry.delete(0, tk.END)
+            self.F_entry.insert(0, "0")
+        else:
+            self.F_entry.config(from_=1, to=min(self.img.width(), self.img.height()), state=tk.NORMAL)
+            self.F_entry.delete(0, tk.END)
+            self.F_entry.insert(0, "1")
 
     def updateDctEnable(self, v, index, mode):
         if self.img == None:
