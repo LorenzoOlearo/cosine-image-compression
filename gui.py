@@ -35,15 +35,16 @@ class GUI(tk.Tk):
 
         self.F_string = tk.StringVar()
         self.F_string.trace_add("write", self.updateDctEnable)
+        self.F_string.trace_add("write", self.updateDEntryLimits)
         self.F_entry = tk.Spinbox(control_frame, from_=0, to=0, textvariable=self.F_string)
+        self.F_entry.config(validate='all', validatecommand=(self.register(self.isFValid), '%P'))
         self.F_entry.grid(row=1, column=0)
 
-        self.d_string = tk.StringVar()
+        self.d_string = tk.IntVar()
         self.d_string.trace_add("write", self.updateDctEnable)
         self.d_entry = tk.Entry(control_frame, textvariable=self.d_string)
+        self.d_entry = tk.Scale(control_frame, orient=tk.HORIZONTAL, from_=0, to=0)
         self.d_entry.grid(row=1, column=1)
-        self.d_entry.config(validate='key', validatecommand=(self.register(self.isDValid), '%P'))
-        self.d_entry.insert(0, "0")
 
         control_frame.columnconfigure(0, weight=1)
         control_frame.columnconfigure(1, weight=1)
@@ -143,6 +144,12 @@ class GUI(tk.Tk):
         except:
             return False
 
+    def isFValid(self, value):
+        if value == '':
+            return True
+        if value > '0' and value <= str(min(self.img.width(), self.img.height())):
+            return False
+
     def isDValid(self, value):
         if value == '' or value == '0':
             return True
@@ -151,7 +158,7 @@ class GUI(tk.Tk):
     def checkD(self):
         d = self.d_string.get()
         try:
-            if int(d) >=0 and int(d) <= 2 * int(self.F_entry.get()) - 2:
+            if d >=0 and d <= 2 * int(self.F_entry.get()) - 2:
                 return True
             else:
                 return False
@@ -167,13 +174,17 @@ class GUI(tk.Tk):
             self.F_entry.config(from_=1, to=min(self.img.width(), self.img.height()), state=tk.NORMAL)
             self.F_entry.delete(0, tk.END)
             self.F_entry.insert(0, "1")
+    
+    def updateDEntryLimits(self, v, index, mode):
+        if self.img == None:
+            self.d_entry.config(from_=0, to=0, state=tk.DISABLED)
+        elif(self.F_string.get() != ''):
+            self.d_entry.config(from_=0, to=2 * int(self.F_string.get()) - 2, state=tk.NORMAL)
+        else:
+            self.d_entry.config(from_=0, to=2 * 1 - 2, state=tk.NORMAL)
 
     def updateDctEnable(self, v, index, mode):
         if self.img == None:
             self.dct_button.config(state=tk.DISABLED)
-        elif self.checkD():
-            self.d_entry.config(fg='black')
-            self.dct_button.config(state=tk.NORMAL)
         else:
-            self.d_entry.config(fg='red')
-            self.dct_button.config(state=tk.DISABLED)
+            self.dct_button.config(state=tk.NORMAL)
