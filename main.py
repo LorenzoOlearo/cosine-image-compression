@@ -4,7 +4,7 @@ from gui import GUI
 
 def main():
     TestCosineTransform().run_test()
-    GUI()
+    # GUI()
     
 
 if __name__ == '__main__':

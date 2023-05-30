@@ -54,3 +54,4 @@ def idct2(matrix):
         cosine_matrix[:, i] = idct(cosine_matrix[:, i])
 
     return cosine_matrix
+
