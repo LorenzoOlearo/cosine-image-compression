@@ -1,16 +1,19 @@
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 
 
 class GUI(tk.Tk):
 
-    def __init__(self):
+    def __init__(self, controller):
         super().__init__()
+
+        self.controller = controller
 
         self.img = None
         self.img_dct = None
         self.scaling = 0
+        
 
         self.title("cosine image compression")
 
@@ -31,17 +34,15 @@ class GUI(tk.Tk):
         self.dct_button = tk.Button(control_frame, text="DCT", command=self.dct, state=tk.DISABLED)
         self.dct_button.grid(row=0, column=1)
 
-        self.F_entry = tk.Entry(control_frame)
+        self.F_string = tk.IntVar()
+        self.F_string.trace_add("write", self.updateDEntryLimits)
+        self.F_entry = tk.Entry(control_frame, textvariable=self.F_string)
+        self.F_entry.config(state=tk.DISABLED, validate='key', validatecommand=(self.register(self.isFValid), '%P'))
         self.F_entry.grid(row=1, column=0)
-        self.F_entry.config(validate='key', validatecommand=(self.register(self.isPositiveInteger), '%P'))
-        self.F_entry.insert(0, "8")
 
-        self.d_string = tk.StringVar()
-        self.d_string.trace_add("write", self.updateDctEnable)
-        self.d_entry = tk.Entry(control_frame, textvariable=self.d_string)
+        self.d_string = tk.IntVar()
+        self.d_entry = tk.Scale(control_frame, orient=tk.HORIZONTAL, from_=0, to=0, variable=self.d_string)
         self.d_entry.grid(row=1, column=1)
-        self.d_entry.config(validate='key', validatecommand=(self.register(self.isDValid), '%P'))
-        self.d_entry.insert(0, "0")
 
         control_frame.columnconfigure(0, weight=1)
         control_frame.columnconfigure(1, weight=1)
@@ -59,76 +60,155 @@ class GUI(tk.Tk):
         image_frame.columnconfigure(1, weight=1)
         image_frame.rowconfigure(0, weight=1)
 
-        self.bind("<MouseWheel>", self.zoom)
-        self.bind("<Button-4>", self.zoom)
-        self.bind("<Button-5>", self.zoom)
 
-        self.mainloop()
+        self.canvas_original.bind("<MouseWheel>", self.zoom)
+        self.canvas_original.bind("<Button-4>", self.zoom)
+        self.canvas_original.bind("<Button-5>", self.zoom)
+        self.canvas_dct.bind("<MouseWheel>", self.zoom)
+        self.canvas_dct.bind("<Button-4>", self.zoom)
+        self.canvas_dct.bind("<Button-5>", self.zoom)
+        self.bind("<Configure>", self.on_resize)
+
+        self.box = (0, 0, self.canvas_original.winfo_width(), self.canvas_original.winfo_height())
+
+    def on_resize(self, event):
+        self.box = (
+            self.box[0],
+            self.box[1],
+            self.box[0] + self.canvas_original.winfo_width(),
+            self.box[1] + self.canvas_original.winfo_height()
+        )
 
     def selectImage(self):
         path = filedialog.askopenfilename(filetypes=[("Image File", '.jpg'), ("Image File", '.png'), ("Image File", '.bmp')])
         try:
-            self.img = ImageTk.PhotoImage(Image.open(path))
+            self.img = ImageTk.PhotoImage(Image.open(path).convert('L'))
             self.img_dct = None
             self.scaling = 0
-            self.canvas_original.create_image(0, 0, anchor='nw', image=self.img)
             self.canvas_label.config(text=path)
-            self.canvas_dct.delete("all")
+            self.F_entry.config(state=tk.NORMAL)
+            self.dct_button.config(state=tk.NORMAL)
+            self.box = (0, 0, self.canvas_original.winfo_width(), self.canvas_original.winfo_height())
 
-            self.updateDctEnable(None, None, None)
         except (Exception):
             self.img = None
             self.img_dct = None
             self.scaling = 0
             self.canvas_label.config(text="No image selected")
-            self.canvas_original.delete("all")
-            self.canvas_dct.delete("all")
+            self.F_entry.config(state=tk.DISABLED)
+            self.dct_button.config(state=tk.DISABLED)
+            self.box = (0, 0, self.canvas_original.winfo_width(), self.canvas_original.winfo_height())
 
-            self.updateDctEnable(None, None, None)
-            
+        
+        self.redraw()
+
+    def start(self):
+
+        self.mainloop()
+
     def zoom(self, event):
+
+        scaling = self.scaling
+
+        box = self.box
+
+        x = box[0] + (box[2] - box[0])/2
+        y = box[1] + (box[3] - box[1])/2
+
         if event.delta == 0:
             if event.num == 4:
-                self.scaling += 1
+                
+                scaling += 1
+
+                x = box[0] + event.x / (2 ** self.scaling)
+                y = box[1] + event.y / (2 ** self.scaling)
+                
+
             elif event.num == 5:
-                self.scaling += -1
+                scaling += -1
         else:
-            self.scaling += int(event.delta/120)
+            scaling += int(event.delta/120)
+            x = box[0] + event.x / (2 ** self.scaling)
+            y = box[1] + event.y / (2 ** self.scaling)
+
+        scale = 2 ** (scaling-self.scaling)
+        box =  (box[0] - x,
+                box[1] - y,
+                box[2] - x,
+                box[3] - y)
+        box =  (box[0] / scale,
+                box[1] / scale,
+                box[2] / scale,
+                box[3] / scale)
+        box =  (box[0] + x,
+                box[1] + y,
+                box[2] + x,
+                box[3] + y)
         
+        if box[0]<0:
+            box = (0,
+                   box[1],
+                   box[2] - box[0],
+                   box[3])
+
+        if box[1]<0:
+            box = (box[0],
+                   0,
+                   box[2],
+                   box[3] - box[1])
+            
+        if box[0]>self.img.width():
+            box = (self.img.width()-1,
+                   box[1],
+                   box[2] - (box[0]-(self.img.width()-1)),
+                   box[3])
+
+        if box[1]>self.img.height():
+            box = (box[0],
+                   self.img.height()-1,
+                   box[2],
+                   box[3] - (box[1]-(self.img.height()-1)))
+        
+        self.box = box
+        self.scaling = scaling
+
+        self.redraw()
+
+    def redraw(self):
+
         self.canvas_original.delete("all") 
         self.canvas_dct.delete("all")
+        maxsize = (self.canvas_original.winfo_width(), self.canvas_original.winfo_height())
 
-        if self.scaling > 0:
-            if self.img is not None:
-                self.zoomed_img = self.img._PhotoImage__photo.zoom(self.scaling)
-                self.canvas_original.create_image(0, 0, anchor='nw', image=self.zoomed_img)
+        scale = 2**self.scaling
 
-            if self.img_dct is not None:
-                self.zoomed_img_dct = self.img_dct._PhotoImage__photo.zoom(self.scaling)
-                self.canvas_dct.create_image(0, 0, anchor='nw', image=self.zoomed_img_dct)
+        if self.img is not None:
+            img = ImageTk.getimage(self.img).copy()
+
+            img = img.crop((self.box[0], self.box[1], min(img.width, self.box[2]), min(img.height, self.box[3])))
+            img = img.resize((round(img.width*scale), round(img.height*scale)), Image.NEAREST)
+
+            self.zoomed_img = ImageTk.PhotoImage(img)
+            self.canvas_original.create_image(0, 0, anchor='nw', image=self.zoomed_img)
         
-        if self.scaling < 0:
-            if self.img is not None:
-                self.zoomed_img = self.img._PhotoImage__photo.subsample(-self.scaling)
-                self.canvas_original.create_image(0, 0, anchor='nw', image=self.zoomed_img)
 
-            if self.img_dct is not None:
-                self.zoomed_img_dct = self.img_dct._PhotoImage__photo.subsample(-self.scaling)
-                self.canvas_dct.create_image(0, 0, anchor='nw', image=self.zoomed_img_dct)
+        if self.img_dct is not None:
+            img = ImageTk.getimage(self.img_dct)
+            if(img.width*scale > maxsize[0] or img.height*scale > maxsize[1]):
+                img = img.crop(self.box)
+            img = img.resize((round(img.width*scale), round(img.height*scale)), Image.NEAREST)
             
-        if self.scaling == 0:
-            if self.img is not None:
-                self.zoomed_img = self.img
-                self.canvas_original.create_image(0, 0, anchor='nw', image=self.zoomed_img)
-
-            if self.img_dct is not None:
-                self.zoomed_img_dct = self.img_dct
-                self.canvas_dct.create_image(0, 0, anchor='nw', image=self.zoomed_img_dct)
+            
+            self.zoomed_img_dct = ImageTk.PhotoImage(img)
+            self.canvas_dct.create_image(0, 0, anchor='nw', image=self.zoomed_img_dct)
 
     def dct(self):
         # TODO call the dct function
-        self.img_dct = self.img
-        self.canvas_dct.create_image(0, 0, anchor='nw', image=self.img_dct)
+        try:
+            self.img_dct = self.controller.dct(self.img, self.F_string.get(), self.d_string.get())
+            self.redraw()
+        except Exception as e:
+            messagebox.showerror("Error", "Invalid input")
 
     def isPositiveInteger(self, value):
         try:
@@ -139,28 +219,23 @@ class GUI(tk.Tk):
         except:
             return False
 
-    def isDValid(self, value):
-        if value == '' or value == '0':
+    def isFValid(self, value):
+        if value == '':
             return True
-        return self.isPositiveInteger(value)
-
-    def checkD(self):
-        d = self.d_string.get()
         try:
-            if int(d) >=0 and int(d) <= 2 * int(self.F_entry.get()) - 2:
+            F = int(value)
+            if F > 0 and F <= min(self.img.width(), self.img.height()):
                 return True
             else:
                 return False
         except:
             return False
-
-
-    def updateDctEnable(self, v, index, mode):
+    
+    def updateDEntryLimits(self, v, index, mode):
         if self.img == None:
-            self.dct_button.config(state=tk.DISABLED)
-        elif self.checkD():
-            self.d_entry.config(fg='black')
-            self.dct_button.config(state=tk.NORMAL)
+            self.d_entry.config(from_=0, to=0, state=tk.DISABLED)
         else:
-            self.d_entry.config(fg='red')
-            self.dct_button.config(state=tk.DISABLED)
+            try:
+                self.d_entry.config(from_=0, to=2 * self.F_string.get() - 2, state=tk.NORMAL)
+            except:
+                self.d_entry.config(from_=0, to=2 * 1 - 2, state=tk.NORMAL)
