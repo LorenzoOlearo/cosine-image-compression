@@ -69,6 +69,15 @@ class GUI(tk.Tk):
         self.canvas_dct.bind("<Button-5>", self.zoom)
         self.bind("<Configure>", self.on_resize)
 
+        self.box = (0, 0, self.canvas_original.winfo_width(), self.canvas_original.winfo_height())
+
+    def on_resize(self, event):
+        self.box = (
+            self.box[0],
+            self.box[1],
+            self.box[0] + self.canvas_original.winfo_width(),
+            self.box[1] + self.canvas_original.winfo_height()
+        )
 
     def selectImage(self):
         path = filedialog.askopenfilename(filetypes=[("Image File", '.jpg'), ("Image File", '.png'), ("Image File", '.bmp')])
@@ -79,6 +88,8 @@ class GUI(tk.Tk):
             self.canvas_label.config(text=path)
             self.F_entry.config(state=tk.NORMAL)
             self.dct_button.config(state=tk.NORMAL)
+            self.box = (0, 0, self.canvas_original.winfo_width(), self.canvas_original.winfo_height())
+
         except (Exception):
             self.img = None
             self.img_dct = None
@@ -86,6 +97,8 @@ class GUI(tk.Tk):
             self.canvas_label.config(text="No image selected")
             self.F_entry.config(state=tk.DISABLED)
             self.dct_button.config(state=tk.DISABLED)
+            self.box = (0, 0, self.canvas_original.winfo_width(), self.canvas_original.winfo_height())
+
         
         self.redraw()
 
@@ -94,18 +107,70 @@ class GUI(tk.Tk):
         self.mainloop()
 
     def zoom(self, event):
+
+        scaling = self.scaling
+
+        box = self.box
+
+        x = box[0] + (box[2] - box[0])/2
+        y = box[1] + (box[3] - box[1])/2
+
         if event.delta == 0:
             if event.num == 4:
-                self.scaling += 1
+                
+                scaling += 1
+
+                x = box[0] + event.x / (2 ** self.scaling)
+                y = box[1] + event.y / (2 ** self.scaling)
+                
+
             elif event.num == 5:
-                self.scaling += -1
+                scaling += -1
         else:
-            self.scaling += int(event.delta/120)
+            scaling += int(event.delta/120)
+            x = box[0] + event.x / (2 ** self.scaling)
+            y = box[1] + event.y / (2 ** self.scaling)
+
+        scale = 2 ** (scaling-self.scaling)
+        box =  (box[0] - x,
+                box[1] - y,
+                box[2] - x,
+                box[3] - y)
+        box =  (box[0] / scale,
+                box[1] / scale,
+                box[2] / scale,
+                box[3] / scale)
+        box =  (box[0] + x,
+                box[1] + y,
+                box[2] + x,
+                box[3] + y)
         
-        self.redraw()
+        if box[0]<0:
+            box = (0,
+                   box[1],
+                   box[2] - box[0],
+                   box[3])
+
+        if box[1]<0:
+            box = (box[0],
+                   0,
+                   box[2],
+                   box[3] - box[1])
+            
+        if box[0]>self.img.width():
+            box = (self.image.width()-1,
+                   box[1],
+                   box[2] - (box[0]-(self.img.width()-1)),
+                   box[3])
+
+        if box[1]>self.img.height():
+            box = (box[0],
+                   self.img.height()-1,
+                   box[2],
+                   box[3] - (box[1]-(self.img.height()-1)))
         
-    
-    def on_resize(self, event):
+        self.box = box
+        self.scaling = scaling
 
         self.redraw()
 
@@ -118,24 +183,24 @@ class GUI(tk.Tk):
         scale = 2**self.scaling
 
         if self.img is not None:
-            img = ImageTk.getimage(self.img)
-            if(img.width*scale > maxsize[0] or img.height*scale > maxsize[1]):
-                img = img.crop((0, 0, maxsize[0]/scale, maxsize[1]/scale))
+            img = ImageTk.getimage(self.img).copy()
+
+            img = img.crop((self.box[0], self.box[1], min(img.width, self.box[2]), min(img.height, self.box[3])))
             img = img.resize((round(img.width*scale), round(img.height*scale)), Image.NEAREST)
-            
+
             self.zoomed_img = ImageTk.PhotoImage(img)
             self.canvas_original.create_image(0, 0, anchor='nw', image=self.zoomed_img)
         
+
         if self.img_dct is not None:
             img = ImageTk.getimage(self.img_dct)
             if(img.width*scale > maxsize[0] or img.height*scale > maxsize[1]):
-                img = img.crop((0, 0, maxsize[0]/scale, maxsize[1]/scale))
+                img = img.crop(self.box)
             img = img.resize((round(img.width*scale), round(img.height*scale)), Image.NEAREST)
+            
             
             self.zoomed_img_dct = ImageTk.PhotoImage(img)
             self.canvas_dct.create_image(0, 0, anchor='nw', image=self.zoomed_img_dct)
-
-
 
     def dct(self):
         # TODO call the dct function
