@@ -64,12 +64,66 @@ class GUI(tk.Tk):
         self.canvas_original.bind("<MouseWheel>", self.zoom)
         self.canvas_original.bind("<Button-4>", self.zoom)
         self.canvas_original.bind("<Button-5>", self.zoom)
+        self.canvas_original.bind("<ButtonPress-1>", self.start_pan)
+        self.canvas_original.bind("<B1-Motion>", self.pan)
         self.canvas_dct.bind("<MouseWheel>", self.zoom)
         self.canvas_dct.bind("<Button-4>", self.zoom)
         self.canvas_dct.bind("<Button-5>", self.zoom)
+        self.canvas_dct.bind("<ButtonPress-1>", self.start_pan)
+        self.canvas_dct.bind("<B1-Motion>", self.pan)
         self.bind("<Configure>", self.on_resize)
 
         self.box = (0, 0, self.canvas_original.winfo_width(), self.canvas_original.winfo_height())
+
+    def start_pan(self, event):
+        self.pan_x = event.x
+        self.pan_y = event.y
+
+    def pan(self, event):
+        scale = 2 ** self.scaling
+        x = (self.pan_x - event.x)/scale
+        y = (self.pan_y - event.y)/scale
+
+        box = (
+            self.box[0] + x,
+            self.box[1] + y,
+            self.box[2] + x,
+            self.box[3] + y
+        )
+
+        right_limit = max(self.img.width(), self.canvas_original.winfo_width()/scale)
+        bottom_limit = max(self.img.height(), self.canvas_original.winfo_height()/scale)
+
+        if box[0]<0:
+            box = (0,
+                   box[1],
+                   box[2] - box[0],
+                   box[3])
+
+        if box[1]<0:
+            box = (box[0],
+                   0,
+                   box[2],
+                   box[3] - box[1])
+            
+        if box[2]>right_limit:
+            box = (box[0] - (box[2] - right_limit),
+                   box[1],
+                   right_limit,
+                   box[3])
+
+        if box[3]>bottom_limit:
+            box = (box[0],
+                   box[1] - (box[3] - bottom_limit),
+                   box[2],
+                   bottom_limit)
+
+
+        self.box = box
+        self.pan_x = event.x
+        self.pan_y = event.y
+
+        self.redraw()
 
     def on_resize(self, event):
         self.box = (
@@ -145,6 +199,9 @@ class GUI(tk.Tk):
                 box[2] + x,
                 box[3] + y)
         
+        right_limit = max(self.img.width(), self.canvas_original.winfo_width()/scale)
+        bottom_limit = max(self.img.height(), self.canvas_original.winfo_height()/scale)
+
         if box[0]<0:
             box = (0,
                    box[1],
@@ -157,22 +214,24 @@ class GUI(tk.Tk):
                    box[2],
                    box[3] - box[1])
             
-        if box[0]>self.img.width():
-            box = (self.img.width()-1,
+        if box[2]>right_limit:
+            box = (box[0] - (box[2] - right_limit),
                    box[1],
-                   box[2] - (box[0]-(self.img.width()-1)),
+                   right_limit,
                    box[3])
 
-        if box[1]>self.img.height():
+
+        if box[3]>bottom_limit:
             box = (box[0],
-                   self.img.height()-1,
+                   box[1] - (box[3] - bottom_limit),
                    box[2],
-                   box[3] - (box[1]-(self.img.height()-1)))
+                   bottom_limit)
         
         self.box = box
         self.scaling = scaling
 
         self.redraw()
+
 
     def redraw(self):
 
