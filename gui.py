@@ -91,6 +91,16 @@ class GUI(tk.Tk):
             self.box[3] + y
         )
 
+        box = self.recenterbox(box)
+
+        self.box = box
+        self.pan_x = event.x
+        self.pan_y = event.y
+
+        self.redraw()
+
+    def recenterbox(self, box):
+        scale = 2 ** self.scaling
         right_limit = max(self.img.width(), self.canvas_original.winfo_width()/scale)
         bottom_limit = max(self.img.height(), self.canvas_original.winfo_height()/scale)
 
@@ -117,13 +127,8 @@ class GUI(tk.Tk):
                    box[1] - (box[3] - bottom_limit),
                    box[2],
                    bottom_limit)
-
-
-        self.box = box
-        self.pan_x = event.x
-        self.pan_y = event.y
-
-        self.redraw()
+        
+        return box
 
     def on_resize(self, event):
         self.box = (
@@ -185,7 +190,16 @@ class GUI(tk.Tk):
             x = box[0] + event.x / (2 ** self.scaling)
             y = box[1] + event.y / (2 ** self.scaling)
 
+        if 2 ** scaling >= self.canvas_original.winfo_width() or 2 ** scaling > self.canvas_original.winfo_height():
+            return
+        if 2 ** scaling <= 1/self.img.width() or 2 ** scaling < 1/self.img.height():
+            return
+        
         scale = 2 ** (scaling-self.scaling)
+
+
+        self.scaling = scaling
+
         box =  (box[0] - x,
                 box[1] - y,
                 box[2] - x,
@@ -199,39 +213,11 @@ class GUI(tk.Tk):
                 box[2] + x,
                 box[3] + y)
         
-        right_limit = max(self.img.width(), self.canvas_original.winfo_width()/scale)
-        bottom_limit = max(self.img.height(), self.canvas_original.winfo_height()/scale)
-
-        if box[0]<0:
-            box = (0,
-                   box[1],
-                   box[2] - box[0],
-                   box[3])
-
-        if box[1]<0:
-            box = (box[0],
-                   0,
-                   box[2],
-                   box[3] - box[1])
-            
-        if box[2]>right_limit:
-            box = (box[0] - (box[2] - right_limit),
-                   box[1],
-                   right_limit,
-                   box[3])
-
-
-        if box[3]>bottom_limit:
-            box = (box[0],
-                   box[1] - (box[3] - bottom_limit),
-                   box[2],
-                   bottom_limit)
+        box = self.recenterbox(box)
         
         self.box = box
-        self.scaling = scaling
 
         self.redraw()
-
 
     def redraw(self):
 
@@ -262,7 +248,6 @@ class GUI(tk.Tk):
             self.canvas_dct.create_image(0, 0, anchor='nw', image=self.zoomed_img_dct)
 
     def dct(self):
-        # TODO call the dct function
         try:
             self.img_dct = self.controller.dct(self.img, self.F_string.get(), self.d_string.get())
             self.redraw()
