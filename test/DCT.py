@@ -52,7 +52,7 @@ class TestCosineTransform():
 
 
     def check_cosine_transform_2D(self, result):
-        scipy_cosine_matrix = fftpack.dct(fftpack.dct(self.matrix.T, norm='ortho').T, norm='ortho')
+        scipy_cosine_matrix = fftpack.dct(fftpack.dct(matrix, axis=0, norm='ortho'), axis=1, norm='ortho')
         assert np.allclose(result, scipy_cosine_matrix, rtol=1e-3), 'Cosine tranform 2D missmatch'
         print('2D cosine tranform test passed!')
 
