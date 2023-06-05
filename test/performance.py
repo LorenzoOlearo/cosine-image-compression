@@ -27,50 +27,89 @@ def compute_fdct(matrix):
     elapsed = end - start
     
     return elapsed
-    
 
 
-def benchmark_matrices(lower, upper, i):
-    sizes = list(range(lower, upper + 1))
-    elapsed_direct = []
-    elapsed_fast = []
-    
-    for size in sizes:
-        matrix = (np.random.random((size, size)) * 255).astype(int)
-        elapsed_direct += [compute_dct(matrix)]
-        elapsed_fast += [compute_fdct(matrix)]
+
+def benchmark_order_matrices(lower, upper, i, load):
+    if load:
+        benchmark_data = pd.read_csv(os.path.join(os.getcwd(), 'test', 'benchmark-order-results-' + str(i) + '.csv'))
+    else:
+        sizes = list(range(lower, upper + 1))
+        elapsed_direct = []
+        elapsed_fast = []
         
-    
-    benchmark_data = pd.DataFrame({'size': sizes,
-                                   'direct': elapsed_direct,
-                                   'fast': elapsed_fast})
-    
-    make_plots(benchmark_data, i)
-        
-    
-        
-       
-        
-def make_plots(benchmark_data, i):
+        for size in sizes:
+            matrix = (np.random.random((2 ** size, 2 ** size)) * 255).astype(int)
+            print('(order) Computing: 2^' + str(size))
+            elapsed_direct  += [compute_dct(matrix)]
+            elapsed_fast    += [compute_fdct(matrix)]
+            
+        benchmark_data = pd.DataFrame({'size': sizes,
+                                       'direct': elapsed_direct,
+                                       'fast': elapsed_fast})
+
+        benchmark_data.to_csv(os.path.join(os.getcwd(), 'test', 'benchmark-order-results-' + str(i) + '.csv'))
+
+    plot_order_results(benchmark_data, i)
+
+
+
+def benchmark_incremental_matrices(lower, upper, i, load):
+    if load:
+        benchmark_data = pd.read_csv(os.path.join(os.getcwd(), 'test', 'benchmark-incremental-results-' + str(i) + '.csv'))
+    else:
+        sizes = list(range(2 ** lower, (2 ** (upper - 1) + 1)))
+        elapsed_direct = []
+        elapsed_fast = []
+
+        for size in sizes:
+            matrix = (np.random.random((size, size)) * 255).astype(int)
+            print('(incremental) Computing: ' + str(size))
+            elapsed_direct  += [compute_dct(matrix)]
+            elapsed_fast    += [compute_fdct(matrix)]
+
+        benchmark_data = pd.DataFrame({'size': sizes,
+                                       'direct': elapsed_direct,
+                                       'fast': elapsed_fast})
+
+        benchmark_data.to_csv(os.path.join(os.getcwd(), 'test', 'benchmark-incremental-results-' + str(i) + '.csv'))
+
+    plot_incremental_results(benchmark_data, i)
+
+
+
+def plot_order_results(benchmark_data, i):
+    result_path = os.path.join(os.getcwd(), 'test', 'benchmark-results')
+    benchmark_data.to_csv(os.path.join(result_path, 'bench-order-' + str(i) + '.csv'))
+
     benchmark_data = benchmark_data.melt(id_vars='size', value_vars=['direct', 'fast'], var_name='y_type', value_name='time')
 
     sns.barplot(data=benchmark_data, x='size', y='time', hue='y_type', errorbar=None, palette='hls').set_yscale('log')
     plt.tight_layout()
-    # plt.show()
-    
-    plt.savefig(os.path.join(os.getcwd(), 'test', 'benchmark-results', 'bench-' + str(i)))
+
+    plt.savefig(os.path.join(result_path, 'bench-order-' + str(i)))
     plt.clf()
 
-    
-    
+
+
+def plot_incremental_results(benchmark_data, i):
+    result_path = os.path.join(os.getcwd(), 'test', 'benchmark-results')
+    benchmark_data.to_csv(os.path.join(result_path, 'bench-incremental-' + str(i) + '.csv'))
+
+    benchmark_data = benchmark_data.melt(id_vars='size', value_vars=['direct', 'fast'], var_name='y_type', value_name='time')
+
+    sns.lineplot(data=benchmark_data, x='size', y='time', hue='y_type', errorbar=None, palette='hls').set_yscale('log')
+    plt.tight_layout()
+
+    plt.savefig(os.path.join(result_path, 'bench-incremental-' + str(i)))
+    plt.clf()
+
+
         
-        
-        
-def run_test(lower=2, upper=20, iterations=10):
+def run_test(iterations=1, lower=1, upper=8, order=True, incremental=True, load=False):
     for i in range(iterations):
-        benchmark_matrices(lower, upper, i)
-    
-    
+        if order:
+            benchmark_order_matrices(lower, upper, i, load)
         
-        
-        
+        if incremental:
+            benchmark_incremental_matrices(lower, upper, i, load)
