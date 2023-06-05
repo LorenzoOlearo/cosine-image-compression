@@ -67,4 +67,3 @@ class TestCosineTransform():
     def check_cosine_anti_transform_2D(self, result):
         assert np.allclose(result, self.matrix, rtol=1e-3), 'Cosine anti tranform 2D missmatch'
         print('2D cosine anti tranform test passed!')
-        

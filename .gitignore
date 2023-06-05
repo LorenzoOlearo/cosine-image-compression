@@ -2,3 +2,5 @@ env/
 images/
 __pycache__/
 .vscode/
+.png
+.csv
