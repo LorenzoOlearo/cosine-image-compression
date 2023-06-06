@@ -33,22 +33,21 @@ class GUI(tk.Tk):
         self.dct_button = tk.Button(control_frame, text="DCT", command=self.dct, state=tk.DISABLED)
         self.dct_button.grid(row=0, column=1, sticky="w")
 
-        self.F_string = tk.IntVar(value=1)
-        self.F_string.trace_add("write", self.updateDEntryLimits)
+        self.F_value = tk.IntVar(value=8)
+        self.F_value.trace_add("write", self.updateDEntryLimits)
         frame = tk.Frame(control_frame)
         frame.grid(row=1, column=0, sticky="ns")
 
-        self.F_entry = tk.Entry(frame, textvariable=self.F_string)
+        self.F_entry = tk.Entry(frame, textvariable=self.F_value)
         self.F_entry.config(state=tk.DISABLED, validate='key', validatecommand=(self.register(self.isFValid), '%P'))
         self.F_entry.grid(row=1, column=0, sticky="s")
 
         tk.Label(frame, text="Size").grid(row=0, column=0, sticky="nw")
 
-        self.d_string = tk.IntVar()
-        self.d_entry = tk.Scale(control_frame, orient=tk.HORIZONTAL, from_=0, to=0, variable=self.d_string, label="Cut frequences")
+        self.d_value = tk.IntVar(value=0)
+        self.d_entry = tk.Scale(control_frame, orient=tk.HORIZONTAL, from_=0, to=0, variable=self.d_value, label="Cut frequences")
         self.d_entry.grid(row=1, column=1, sticky="ew")
 
-        #control_frame.columnconfigure(0, weight=1)
         control_frame.columnconfigure(1, weight=1)
 
         self.canvas_original = tk.Canvas(image_frame)
@@ -63,7 +62,6 @@ class GUI(tk.Tk):
         image_frame.columnconfigure(0, weight=1)
         image_frame.columnconfigure(1, weight=1)
         image_frame.rowconfigure(0, weight=1)
-
 
         self.canvas_original.bind("<MouseWheel>", self.zoom)
         self.canvas_original.bind("<Button-4>", self.zoom)
@@ -138,9 +136,10 @@ class GUI(tk.Tk):
         self.box = (
             self.box[0],
             self.box[1],
-            self.box[0] + self.canvas_original.winfo_width(),
-            self.box[1] + self.canvas_original.winfo_height()
+            self.box[0] + self.canvas_original.winfo_width() / (2 ** self.scaling),
+            self.box[1] + self.canvas_original.winfo_height() / (2 ** self.scaling)
         )
+        self.redraw()
 
     def selectImage(self):
         path = filedialog.askopenfilename(filetypes=[("Image File", '.jpg'), ("Image File", '.png'), ("Image File", '.bmp')])
@@ -152,6 +151,7 @@ class GUI(tk.Tk):
             self.F_entry.config(state=tk.NORMAL)
             self.dct_button.config(state=tk.NORMAL)
             self.box = (0, 0, self.canvas_original.winfo_width(), self.canvas_original.winfo_height())
+            self.updateDEntryLimits(None, None, None)
 
         except (Exception):
             self.img = None
@@ -161,6 +161,7 @@ class GUI(tk.Tk):
             self.F_entry.config(state=tk.DISABLED)
             self.dct_button.config(state=tk.DISABLED)
             self.box = (0, 0, self.canvas_original.winfo_width(), self.canvas_original.winfo_height())
+            self.updateDEntryLimits(None, None, None)
 
         self.redraw()
 
@@ -221,7 +222,7 @@ class GUI(tk.Tk):
         self.canvas_original.delete("all") 
         self.canvas_dct.delete("all")
 
-        scale = 2**self.scaling
+        scale = 2 ** self.scaling
 
         if self.img is not None:
             img = ImageTk.getimage(self.img).copy()
@@ -242,7 +243,7 @@ class GUI(tk.Tk):
 
     def dct(self):
         try:
-            self.img_dct = self.controller.dct(self.img, self.F_string.get(), self.d_string.get())
+            self.img_dct = self.controller.dct(self.img, self.F_value.get(), self.d_value.get())
             self.redraw()
         except Exception as e:
             messagebox.showerror("Error", "Invalid input")
@@ -264,6 +265,6 @@ class GUI(tk.Tk):
             self.d_entry.config(from_=0, to=0, state=tk.DISABLED)
         else:
             try:
-                self.d_entry.config(from_=0, to=2 * self.F_string.get() - 2, state=tk.NORMAL)
+                self.d_entry.config(from_=0, to=2 * self.F_value.get() - 2, state=tk.NORMAL)
             except:
                 self.d_entry.config(from_=0, to=2 * 1 - 2, state=tk.NORMAL)
