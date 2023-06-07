@@ -1,12 +1,18 @@
+import argparse
+
 from cosineimagecompression import CosineImageCompression
-from test.DCT import TestCosineTransform
-from test.performance import run_test
-from gui import GUI
+
+
 
 def main():
-    TestCosineTransform().run_test()
-    CosineImageCompression()
-    run_test()
+    parser = argparse.ArgumentParser(description='Cosine Image Compression')
+    parser.add_argument('--nogui', action='store_true', help='Run program with no GUI', default=False)
+    parser.add_argument('--test', action='store_true', help='Run test')
+    parser.add_argument('--performance', action='store_true', help='Run performance test') 
+    args = parser.parse_args()
+    
+    CosineImageCompression(args)
+   
     
 
 if __name__ == '__main__':

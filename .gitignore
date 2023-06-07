@@ -4,3 +4,10 @@ __pycache__/
 .vscode/
 .png
 .csv
+
+report/
+!report/main.tex
+!report/main.pdf
+
+test/*.png
+test/*.csv

@@ -39,8 +39,8 @@ class TestCosineTransform():
         self.check_cosine_anti_transform_2D(jpegDCT.idct2(cosine_matrix))
        
         compressed = jpegUtils.bitmap_to_jpeg(self.bitmap, macro_size=8, freq_cut=2, fast=True)
-        plt.imshow(compressed, cmap=plt.cm.gray)
-        plt.show()
+        # plt.imshow(compressed, cmap=plt.cm.gray)
+        # plt.show()
 
 
 

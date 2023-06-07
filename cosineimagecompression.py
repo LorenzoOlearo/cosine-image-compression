@@ -7,13 +7,23 @@ from gui import GUI
 
 from PIL import Image, ImageTk
 
+from test.DCT import TestCosineTransform
+from test.performance import run_test
+
 
 class CosineImageCompression():
 
-    def __init__(self, fast = True) -> None:
+    def __init__(self, args, fast = True) -> None:
         self.gui = GUI(self)
         self.fast = fast
-        self.gui.start()
+        
+        if args.test:
+            TestCosineTransform().run_test()
+        if args.performance:
+            run_test()
+        if not args.nogui:
+            self.gui.start()
+            
 
     def dct(self, image, F, d):
         image = ImageTk.getimage(image).convert('L')
