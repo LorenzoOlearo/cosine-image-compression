@@ -20,7 +20,7 @@ class CosineImageCompression():
         if args.test:
             TestCosineTransform().run_test()
         if args.performance:
-            run_test()
+            run_test(lower=args.lower, upper=args.upper, iterations=args.iterations, load=args.load)
         if not args.nogui:
             self.gui.start()
             
