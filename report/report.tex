@@ -205,7 +205,45 @@ l'immagine originale e quella su cui è stato eseguito l'algoritmo di
 compressione delle frequenze. L'applicazione permette inoltre \texttt{zoom} e
 \texttt{pan} delle due immagini simultaneamente.
 
-\textsc{AGGIUNGERE SCREENSHOT APPLICAZIONI}
+L'interfaccia grafica presenta una barra di controllo mostrata in 
+figura~\ref{fig:control-bar} dove sono presenti due pulsanti, uno per 
+selezionare l'immagine da utilizzare e uno per avviare il processo di 
+compressione con DCT. Dopo il caricamento dell'immagine il pulsante per avviare 
+la compressione viene abilitato insieme ai campi per l'input dei parametri 
+$F$ e $d$.
 
+\begin{figure}[h]
+  \includegraphics[width=\textwidth]{./imgs/control-bar.png}
+  \caption{Barra di controllo dell'applicazione.}
+  \label{fig:control-bar}
+\end{figure}
+
+L'inserimento del parametro $F$, è limitato ai valori tra 1 e la dimensione 
+dell'immagine, e lo slider per il parametro $d$, è limitato tra $0$ e $2F-2$.
+Alla pressione del pulsante DCT viene eseguita la trasformata e viene mostrato
+il risultato della compressione affiancato all'immagine originale come mostrato
+in figura~\ref{fig:after-transform}.
+
+\begin{figure}[h]
+  \includegraphics[width=\textwidth]{./imgs/after-transform.png}
+  \caption{L'applicazione mostra l'immagine originale e quella trasformata.}
+  \label{fig:after-transform}
+\end{figure}
+
+Per meglio visualizzare l'immagine è possibile utilizzare la rotella del mouse 
+per scalarla e il tasto sinisto per trascinarla. Così facendo è possibile
+apprezzare la differenza tra le due immagini come in 
+figura~\ref{fig:zoomed-detail}.
+
+\begin{figure}[h]
+  \includegraphics[width=\textwidth]{./imgs/zoomed-detail.png}
+  \caption{Zoom su un dettaglio dell'immagine.}
+  \label{fig:zoomed-detail}
+\end{figure}
+
+Lo zoom e il pan sono implementati tramite il modulo \texttt{PIL} di Python che
+viene utilizzato per tagliare e ridimensionare le immagini prima di mostrarle, 
+le trasformazioni utilizzano un criterio nearest neighbour, in modo da non 
+introdurre artefatti durante lo zoom.
 
 \end{document}
