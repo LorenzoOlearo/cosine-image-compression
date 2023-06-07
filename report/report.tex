@@ -13,6 +13,7 @@
 \usepackage{parskip}
 \usepackage[a4paper,width=150mm,top=25mm,bottom=25mm]{geometry}
 
+\usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{subcaption}
@@ -67,6 +68,13 @@
   immagini in toni di grigio. Comprende l'implementazione di un codice e la
   scrittura di una relazione da consegnare al docente.}
 
+\vspace{12pt}
+
+\begin{shaded}
+Tutto il codice sorgente per il la realizzazione del progetto comprendente
+consegne, test, esperimenti e relazione è stato pubblicato al seguente
+repository GitHub: \url{https://github.com/LorenzoOlearo/cosine-image-compression}
+\end{shaded}
 
 % \renewcommand{\contentsname}{Indice dei contenuti}
 % \tableofcontents
@@ -81,9 +89,24 @@ La trasformata DCT2 diretta è stata implementata in Python mentre per la sua
 versione \textit{fast} è stata utilizzata la libreria \texttt{fftpack} di
 \texttt{scipy}.
 
-\begin{equation}
-  y_k = x_0 + il resto
-\end{equation}
+La trasformata DCT che è stata implementata è la DCT di tipo II secondo la
+seguente definizione:
+
+\begin{equation*}
+  c_k = \alpha_k^N \sum_{i=0}^{N-1} f_i \cos \left(\pi k \frac{2i + 1}{2N} \right), \qquad k=0, \cdots, N-1
+\end{equation*}
+
+Dove, $\alpha_k^N$ è il fattore di normalizzazione ed è definito come:
+\begin{equation*}
+  \begin{cases}
+    \alpha_k^N = \sqrt{\frac{1}{N}} \quad per \quad k = 0 \\
+    \alpha_k^N = \sqrt{\frac{2}{N}} \quad per \quad k = 1, \cdots, N-1
+  \end{cases}
+\end{equation*}
+in modo che le basi dello spazio dei coseni siano ortonormali.
+
+Per calcolare la DCT2 su matrici si è calcolata la DCT, come definita sopra, prima
+sulle righe e poi sulle colonne della matrice.
 
 Per confrontare i tempi di esecuzione delle due implementazioni sono state
 create una serie di matrici di interi di dimensioni crescenti, da 2x2 a
@@ -108,7 +131,7 @@ Come si può osservare dal grafico in Figura
 tramite il metodo diretto cresce in maniera decisamente più rapida rispetto a
 quello della DCT calcolata tramite la libreria \texttt{fft} di \texttt{scipy}.
 
-La DCT calcolata tramite il metodo diretto presenta tempi proporzionali a $N^3$
+La DCT2 calcolata tramite il metodo diretto presenta tempi proporzionali a $N^3$
 rendendola quindi inutilizzabile per matrici di grandi dimensioni, la DCT calcolata
 tramite la libreria \texttt{fft} di \texttt{scipy} invece presenta tempi di esecuzione 
 decisamente migliori.
@@ -126,7 +149,7 @@ dimensioni pari a potenze di 2 crescenti.
   \label{fig:order-benchmark}
 \end{figure}
 
-Anche in questo caso, come si può osservare dal grafico in
+Anche in questo caso, come si può osservare dal grafico in figura
 \ref{fig:order-benchmark}, la DCT implementata tramite il medoto diretto risulta
 considerevolmente più lenta rispetto a quella implementata tramite la libreria
 \texttt{fft} di \texttt{scipy}.
@@ -142,7 +165,7 @@ Anche per la realizzazione di questa seconda parte si è scelto di utilizzare
 Python, in particolare, l'interfaccia grafica è stata realizzata tramite la
 libreria \texttt{tkinter}.
 
-Il software implementato permette all'utente di caricare un immagine
+Il software implementato permette all'utente di caricare un'immagine
 \texttt{BMP} in scala di grigi dal proprio filesystem sfruttando il \textit{file
   picker} di \texttt{tkinter}.
 
@@ -158,8 +181,8 @@ di specificare:
 
 Una volta trasfrormata l'immagine, l'applicazione mostra fianco a fianco
 l'immagine originale e quella su cui è stato eseguito l'algoritmo di
-compressione delle frequenze. L'applicazione permette inoltre lo zoom e il pan
-delle due immagini simultaneamente.
+compressione delle frequenze. L'applicazione permette inoltre \texttt{zoom} e
+\texttt{pan} delle due immagini simultaneamente.
 
 \textsc{AGGIUNGERE SCREENSHOT APPLICAZIONI}
 
