@@ -19,7 +19,17 @@
 \usepackage{subcaption}
 \captionsetup{width=0.8\textwidth}
 
-
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+  basicstyle=\ttfamily,
+  columns=fullflexible,
+  breaklines=true,
+  postbreak=\raisebox{0ex}[0ex][0ex]{\color{red}$\hookrightarrow$\space},
+  keepspaces,
+  language=Bash,
+  showtabs=true,
+}
 
 \usepackage[noframe]{showframe}
 \usepackage{framed}
@@ -43,21 +53,21 @@
 \newcommand\HUGE{\@setfontsize\Huge{50}{60}}
 \makeatother
 \titleformat{\chapter}
-  {\scshape\LARGE\bfseries\HUGE}
-  {\makebox[6pc][l]{\HUGE\thechapter\hfil\rule[-4pt]{0.5pt}{2pc}}}
-  {0pt}
-  {\LARGE}
-  \titlespacing*{\chapter}{0pt}{0pt}{24pt}
+	{\scshape\LARGE\bfseries\HUGE}
+	{\makebox[6pc][l]{\HUGE\thechapter\hfil\rule[-4pt]{0.5pt}{2pc}}}
+	{0pt}
+	{\LARGE}
+	\titlespacing*{\chapter}{0pt}{0pt}{24pt}
 
 
 \title{\textsc{\textbf{Compressione di immagini tramite la DCT}}}
 
 \author{
-    \begin{tabular}{cc}
-        Lorenzo Olearo & Alessandro Riva \\
-        \href{mailto:l.olearo@campus.unimib.it}{\texttt{\small{l.olearo@campus.unimib.it}}} &
-        \href{mailto:a.riva86@campus.unimib.it}{\texttt{\small{\quad a.riva86@campus.unimib.it}}}
-    \end{tabular}
+		\begin{tabular}{cc}
+				Lorenzo Olearo & Alessandro Riva \\
+				\href{mailto:l.olearo@campus.unimib.it}{\texttt{\small{l.olearo@campus.unimib.it}}} &
+				\href{mailto:a.riva86@campus.unimib.it}{\texttt{\small{\quad a.riva86@campus.unimib.it}}}
+		\end{tabular}
 }
 
 
@@ -70,10 +80,10 @@
 
 
 \textit{Lo scopo di questo progetto è di utilizzare l'implementazione della trasformata
-  DCT2 in un ambiente open source e di studiare gli effetti di un algoritmo di
-  compressione di tipo JPEG (senza utilizzare una matrice di quantizzazione) sulle
-  immagini in toni di grigio. Comprende l'implementazione di un codice e la
-  scrittura di una relazione da consegnare al docente.}
+	DCT2 in un ambiente open source e di studiare gli effetti di un algoritmo di
+	compressione di tipo JPEG (senza utilizzare una matrice di quantizzazione) sulle
+	immagini in toni di grigio. Comprende l'implementazione di un codice e la
+	scrittura di una relazione da consegnare al docente.}
 
 \vspace{12pt}
 
@@ -102,15 +112,15 @@ La trasformata DCT che è stata implementata è la DCT di tipo II secondo la
 seguente definizione:
 
 \begin{equation*}
-  c_k = \alpha_k^N \sum_{i=0}^{N-1} f_i \cos \left(\pi k \frac{2i + 1}{2N} \right), \qquad k=0, \cdots, N-1
+	c_k = \alpha_k^N \sum_{i=0}^{N-1} f_i \cos \left(\pi k \frac{2i + 1}{2N} \right), \qquad k=0, \cdots, N-1
 \end{equation*}
 
 Dove, $\alpha_k^N$ è il fattore di normalizzazione ed è definito come:
 \begin{equation*}
-  \begin{cases}
-    \alpha_k^N = \sqrt{\frac{1}{N}} \quad per \quad k = 0 \\
-    \alpha_k^N = \sqrt{\frac{2}{N}} \quad per \quad k = 1, \cdots, N-1
-  \end{cases}
+	\begin{cases}
+		\alpha_k^N = \sqrt{\frac{1}{N}} \quad per \quad k = 0 \\
+		\alpha_k^N = \sqrt{\frac{2}{N}} \quad per \quad k = 1, \cdots, N-1
+	\end{cases}
 \end{equation*}
 in modo che le basi dello spazio dei coseni siano ortonormali.
 
@@ -129,12 +139,12 @@ riportati su un grafico che mette in relazione le dimensioni delle matrici con i
 tempi di esecuzione degli algoritmi in scala logaritmica.
 
 \begin{figure}[H]
-  \centering
-  \includegraphics[width=0.8\textwidth]{../test/benchmark-results/bench-incremental-0.png}
-  \caption{Confronto tra DCT diretta e veloce, sull'asse delle ascisse la
-    dimensione delle metrici, sull'asse delle ordinate il tempo di esecuzione in
-    scala logaritmica.}
-  \label{fig:incremental-benchmark}
+	\centering
+	\includegraphics[width=0.8\textwidth]{../test/benchmark-results/bench-incremental-0.png}
+	\caption{Confronto tra DCT diretta e veloce, sull'asse delle ascisse la
+		dimensione delle metrici, sull'asse delle ordinate il tempo di esecuzione in
+		scala logaritmica.}
+	\label{fig:incremental-benchmark}
 \end{figure}
 
 Come si può osservare dal grafico in Figura
@@ -152,12 +162,12 @@ di mettere a confronto i tempi di esecuzione della traformatata DCT2 su input di
 dimensioni pari a potenze di 2 crescenti.
 
 \begin{figure}[H]
-  \centering
-  \includegraphics[width=0.8\textwidth]{../test/benchmark-results/bench-order-0.png}
-  \caption{Confronto tra DCT diretta e veloce su input di dimensione pari a
-    potenze di 2. Sull'asse delle ordinate il tempo in scala logaritmica,
-    sull'asse delle ascisse le potenze di due delle dimensioni delle matrici.}
-  \label{fig:order-benchmark}
+	\centering
+	\includegraphics[width=0.8\textwidth]{../test/benchmark-results/bench-order-0.png}
+	\caption{Confronto tra DCT diretta e veloce su input di dimensione pari a
+		potenze di 2. Sull'asse delle ordinate il tempo in scala logaritmica,
+		sull'asse delle ascisse le potenze di due delle dimensioni delle matrici.}
+	\label{fig:order-benchmark}
 \end{figure}
 
 Anche in questo caso, come si può osservare dal grafico in figura
@@ -170,9 +180,55 @@ effettuare il confronto tra la DCT diretta che è stata implementata e quella
 \textit{fast} di \texttt{scipy} su matrici di dimensione incrementali comprese
 tra un valore di lower e upper buond, si può lanciare il programma con i
 seguenti argomenti:
-\begin{verbatim*}
-  python main.py --performance --lower 
-\end{verbatim*}
+\vspace{12pt}
+\begin{lstlisting}[frame=single]
+ > python main.py --nogui \
+			--performance --incremental --lower <value> --upper <value>
+\end{lstlisting}
+
+Il software sviluppato permette inoltre di eseguire il confronto sulle
+prestazioni delle due trasformate su matrici di dimensioni pari a multipli di 2
+tramite i seguenti comandi:
+\vspace{12pt}
+\begin{lstlisting}[frame=single]
+ > python main.py --nogui \
+      --performance --order --lower <value> --upper <value>
+\end{lstlisting}
+
+Siccome è stato necessario implementare la trasformata coseno diretta, al fine
+di poterne verificare la corretta è stato necessario introdurre dei metodi di
+test appositi. Si è scelto di esporre questi metodi tramite il parametro
+\texttt{test}.
+
+E' possibile quindi eseguire solo il test della corretta implementazione della
+trasformata coseno con i seguenti parametri:
+\vspace{12pt}
+\begin{lstlisting}[frame=single]
+ > python main.py --nogui --test
+\end{lstlisting}
+
+Per avere tutti i parametri con le loro descrizioni è possibile usare il
+parametro \texttt{help} come segue:
+\vspace{12pt}
+\begin{lstlisting}[frame=single]
+ > python main.py --help
+    Cosine Image Compression,
+    Written By Lorenzo Olearo and Alessandro Riva, 2023
+
+    options:
+      -h, --help            Show this help message and exit
+      --nogui               Run program with no GUI
+      --test                Run test
+      --performance         Run performance test
+      --slow                Use direct cosine transform [...]
+      --order               Test DCT on matrix on order of 2 [...]
+      --incremental         Test DCT on matrix on incremental [...]
+      --lower LOWER         Lower bound for performance tests
+      --upper UPPER         Upper bound for performance tests
+      --iterations          Iteration of the same tests
+      --load                Load pre-computed data in order to [...]
+\end{lstlisting}
+
 
 
 
