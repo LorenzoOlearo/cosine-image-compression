@@ -79,8 +79,10 @@
 
 \begin{shaded}
 Tutto il codice sorgente per il la realizzazione del progetto comprendente
-consegne, test, esperimenti e relazione è stato pubblicato al seguente
-repository GitHub: \url{https://github.com/LorenzoOlearo/cosine-image-compression}
+consegne, test, esperimenti, grafici e relazione è stato pubblicato al seguente
+repository GitHub: \url{https://github.com/LorenzoOlearo/cosine-image-compression}.
+Il repository rimarrà privato fino alla data dell'esame, per avere l'accesso,
+le chiediamo per ragioni tecniche di comunicarcelo via mail.
 \end{shaded}
 
 % \renewcommand{\contentsname}{Indice dei contenuti}
@@ -89,11 +91,11 @@ repository GitHub: \url{https://github.com/LorenzoOlearo/cosine-image-compressio
 
 \section{Confronto tra DCT diretta e veloce}
 Nella prima parte del progetto si richiede di confrontare le prestazioni della
-DCT2 come spiegata a lezione, nella sua forma diretta, con quella di una libreria
-open source a scelta che si presuppone sia nella sua versione \textit{fast}.
+DCT2 come spiegata a lezione nella sua forma diretta, con quella di una libreria
+open source a scelta che si presuppone essere nella sua versione \textit{fast}.
 
 La trasformata DCT2 diretta è stata implementata in Python mentre per la sua
-versione \textit{fast} è stata utilizzata la libreria \texttt{fftpack} di
+versione \textit{fast} è stata utilizzata la libreria Python \texttt{fftpack} di
 \texttt{scipy}.
 
 La trasformata DCT che è stata implementata è la DCT di tipo II secondo la
@@ -117,7 +119,9 @@ sulle righe e poi sulle colonne della matrice.
 
 Per confrontare i tempi di esecuzione delle due implementazioni sono state
 create una serie di matrici di interi di dimensioni crescenti, da 2x2 a
-1024x1024, con valori casuali compresi tra 0 e 255. 
+1024x1024, con valori casuali compresi tra 0 e 255. La scelta dell'upper-buond
+dei test dipende soltanto da i limiti computazionali dei calcolatori a nostra
+disposizine.
 
 Ogni matrice è stata poi trasformata con entrambe le implementazioni della DCT2
 tenendo traccia dei rispettivi tempi di esecuzione. I risultati sono stati
@@ -160,6 +164,16 @@ Anche in questo caso, come si può osservare dal grafico in figura
 \ref{fig:order-benchmark}, la DCT implementata tramite il medoto diretto risulta
 considerevolmente più lenta rispetto a quella implementata tramite la libreria
 \texttt{fft} di \texttt{scipy}.
+
+Tramite il software sviluppato è possibile ripetere i test qui presentati. Per
+effettuare il confronto tra la DCT diretta che è stata implementata e quella
+\textit{fast} di \texttt{scipy} su matrici di dimensione incrementali comprese
+tra un valore di lower e upper buond, si può lanciare il programma con i
+seguenti argomenti:
+\begin{verbatim*}
+  python main.py --performance --lower 
+\end{verbatim*}
+
 
 
 \section{Compressione di immagini}
