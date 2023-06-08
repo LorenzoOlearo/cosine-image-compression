@@ -88,15 +88,16 @@
 \vspace{12pt}
 
 \begin{shaded}
-Tutto il codice sorgente per il la realizzazione del progetto comprendente
-consegne, test, esperimenti, grafici e relazione è stato pubblicato al seguente
-repository GitHub: \url{https://github.com/LorenzoOlearo/cosine-image-compression}.
-Il repository rimarrà privato fino alla data dell'esame, per avere l'accesso,
-le chiediamo per ragioni tecniche di comunicarcelo via mail.
+Tutto il codice sorgente per la realizzazione del progetto comprendente
+consegne, test, esperimenti, grafici, dati e relazione è stato pubblicato al
+seguente repository GitHub:
+\url{https://github.com/LorenzoOlearo/cosine-image-compression}. Il repository
+rimarrà privato fino alla data dell'esame, per avere l'accesso, le chiediamo per
+ragioni tecniche di comunicarcelo via mail.
 \end{shaded}
 
-% \renewcommand{\contentsname}{Indice dei contenuti}
-% \tableofcontents
+\renewcommand{\contentsname}{Indice dei contenuti}
+\tableofcontents
 
 
 \section{Confronto tra DCT diretta e veloce}
@@ -108,11 +109,10 @@ La trasformata DCT2 diretta è stata implementata in Python mentre per la sua
 versione \textit{fast} è stata utilizzata la libreria Python \texttt{fftpack} di
 \texttt{scipy}.
 
-La trasformata DCT che è stata implementata è la DCT di tipo II secondo la
-seguente definizione:
+La trasformata DCT che è stata implementata è la DCT di tipo II con riferimento alla seguente definizione:
 
 \begin{equation*}
-	c_k = \alpha_k^N \sum_{i=0}^{N-1} f_i \cos \left(\pi k \frac{2i + 1}{2N} \right), \qquad k=0, \cdots, N-1
+	c_k = \alpha_k^N \sum_{i=0}^{N-1} x_i \cos \left(\pi k \frac{2i + 1}{2N} \right), \qquad k=0, \cdots, N-1
 \end{equation*}
 
 Dove, $\alpha_k^N$ è il fattore di normalizzazione ed è definito come:
@@ -124,14 +124,25 @@ Dove, $\alpha_k^N$ è il fattore di normalizzazione ed è definito come:
 \end{equation*}
 in modo che le basi dello spazio dei coseni siano ortonormali.
 
+L'implementazione Python della DCT come definita sopra è la seguente:
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{imgs/dct-python.png}
+\end{figure}
+
 Per calcolare la DCT2 su matrici si è calcolata la DCT, come definita sopra, prima
 sulle righe e poi sulle colonne della matrice.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.6\textwidth]{imgs/dct2-python.png}
+\end{figure}
+
 
 Per confrontare i tempi di esecuzione delle due implementazioni sono state
 create una serie di matrici di interi di dimensioni crescenti, da 2x2 a
 1024x1024, con valori casuali compresi tra 0 e 255. La scelta dell'upper-buond
 dei test dipende soltanto da i limiti computazionali dei calcolatori a nostra
-disposizine.
+disposizione.
 
 Ogni matrice è stata poi trasformata con entrambe le implementazioni della DCT2
 tenendo traccia dei rispettivi tempi di esecuzione. I risultati sono stati
@@ -139,10 +150,9 @@ riportati su un grafico che mette in relazione le dimensioni delle matrici con i
 tempi di esecuzione degli algoritmi in scala logaritmica.
 
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=0.8\textwidth]{../test/benchmark-results/bench-incremental-0.png}
+	\includegraphics[width=0.8\textwidth]{imgs/bench-incremental-0.png}
 	\caption{Confronto tra DCT diretta e veloce, sull'asse delle ascisse la
-		dimensione delle metrici, sull'asse delle ordinate il tempo di esecuzione in
+		dimensione delle matrici, sull'asse delle ordinate il tempo di esecuzione in
 		scala logaritmica.}
 	\label{fig:incremental-benchmark}
 \end{figure}
@@ -163,7 +173,7 @@ dimensioni pari a potenze di 2 crescenti.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{../test/benchmark-results/bench-order-0.png}
+	\includegraphics[width=0.8\textwidth]{imgs/bench-order-0.png}
 	\caption{Confronto tra DCT diretta e veloce su input di dimensione pari a
 		potenze di 2. Sull'asse delle ordinate il tempo in scala logaritmica,
 		sull'asse delle ascisse le potenze di due delle dimensioni delle matrici.}
@@ -172,13 +182,14 @@ dimensioni pari a potenze di 2 crescenti.
 
 Anche in questo caso, come si può osservare dal grafico in figura
 \ref{fig:order-benchmark}, la DCT implementata tramite il medoto diretto risulta
-considerevolmente più lenta rispetto a quella implementata tramite la libreria
+essere considerevolmente più lenta rispetto a quella implementata tramite la
+libreria
 \texttt{fft} di \texttt{scipy}.
 
 Tramite il software sviluppato è possibile ripetere i test qui presentati. Per
 effettuare il confronto tra la DCT diretta che è stata implementata e quella
 \textit{fast} di \texttt{scipy} su matrici di dimensione incrementali comprese
-tra un valore di lower e upper buond, si può lanciare il programma con i
+tra un valore di lower e upper buond, si può eseguire il programma con i
 seguenti argomenti:
 \vspace{12pt}
 \begin{lstlisting}[frame=single]
@@ -188,7 +199,7 @@ seguenti argomenti:
 
 Il software sviluppato permette inoltre di eseguire il confronto sulle
 prestazioni delle due trasformate su matrici di dimensioni pari a multipli di 2
-tramite i seguenti comandi:
+tramite i seguenti argomenti:
 \vspace{12pt}
 \begin{lstlisting}[frame=single]
  > python main.py --nogui \
@@ -196,7 +207,7 @@ tramite i seguenti comandi:
 \end{lstlisting}
 
 Siccome è stato necessario implementare la trasformata coseno diretta, al fine
-di poterne verificare la corretta è stato necessario introdurre dei metodi di
+di poterne verificare la correttezza è stato necessario introdurre dei metodi di
 test appositi. Si è scelto di esporre questi metodi tramite il parametro
 \texttt{test}.
 
@@ -238,13 +249,15 @@ grafica che permetta di caricare un'immagine in formato \texttt{BMP} in toni di
 grigio e di applicare un algoritmo di compressione JPEG senza però utilizzare una
 matrice di quantizzazione.
 
+
+
 Anche per la realizzazione di questa seconda parte si è scelto di utilizzare
 Python, in particolare, l'interfaccia grafica è stata realizzata tramite la
 libreria \texttt{tkinter}.
 
 Il software implementato permette all'utente di caricare un'immagine
 \texttt{BMP} in scala di grigi dal proprio filesystem sfruttando il \textit{file
-  picker} di \texttt{tkinter}.
+picker} di \texttt{tkinter}.
 
 Una volta caricata l'immagine all'interno dell'applicazione, l'utente è in grado
 di specificare:
@@ -256,17 +269,54 @@ di specificare:
         taglio delle frequenza
 \end{itemize}
 
-Una volta trasfrormata l'immagine, l'applicazione mostra fianco a fianco
-l'immagine originale e quella su cui è stato eseguito l'algoritmo di
-compressione delle frequenze. L'applicazione permette inoltre \texttt{zoom} e
-\texttt{pan} delle due immagini simultaneamente.
 
+\subsection{Backend}
+
+Una volta specificati questi parametri tramite l'interfaccia grafica, la matrice
+corrispondente all'immagine \texttt{BMP} caricata dall'utente viene passata
+all'algoritmo di compressione.
+
+L'algoritmo di compressione viene invocato dal modulo controller tramite il metodo
+\texttt{bitmap\_to\_jpeg} 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=1\textwidth]{./imgs/bitmap-to-jpeg.png}
+  \label{fig:bitmap-to-jpeg}
+\end{figure}
+
+Per ogni macroblocco si applicano ora una serie di funzioni nel seguente ordine:
+\begin{enumerate}
+  \item \texttt{dct2}: applica la DCT2 al macroblocco, i pixel in eccesso
+    vengono eliminati
+  \item \texttt{frequency\_cut}: applica il taglio delle frequenze
+  \item \texttt{idct2}: applica l'antitrafrormata al macroblocco
+  \item \texttt{clamp\_macro\_block}: arrotonda i valori all'intero più vicino,
+    mettendo a zero quelli negativi e a 255 quelli superiori di 255
+\end{enumerate}
+
+Infine, tutti i macroblocchi vengono ricomposti nell'ordine corretto per formare
+l'immagine compressa dal metodo \texttt{recompose\_macro\_blocks}.
+
+\begin{shaded}
+  \centering
+  L'intero codice sorgete è pubblicato al repository GitHub: \\
+  \url{https://github.com/LorenzoOlearo/cosine-image-compression}.
+
+\end{shaded}
+
+
+\subsection{Frontend}
 L'interfaccia grafica presenta una barra di controllo mostrata in 
 figura~\ref{fig:control-bar} dove sono presenti due pulsanti, uno per 
 selezionare l'immagine da utilizzare e uno per avviare il processo di 
 compressione con DCT. Dopo il caricamento dell'immagine il pulsante per avviare 
 la compressione viene abilitato insieme ai campi per l'input dei parametri 
 $F$ e $d$.
+
+Una volta trasfrormata l'immagine, l'applicazione mostra fianco a fianco
+l'immagine originale e quella su cui è stato eseguito l'algoritmo di
+compressione delle frequenze. L'applicazione permette inoltre \texttt{zoom} e
+\texttt{pan} delle due immagini simultaneamente.
 
 \begin{figure}[h]
   \includegraphics[width=\textwidth]{./imgs/control-bar.png}
@@ -301,5 +351,23 @@ Lo zoom e il pan sono implementati tramite il modulo \texttt{PIL} di Python che
 viene utilizzato per tagliare e ridimensionare le immagini prima di mostrarle, 
 le trasformazioni utilizzano un criterio nearest neighbour, in modo da non 
 introdurre artefatti durante lo zoom.
+
+
+\begin{figure}[h]
+  \includegraphics[width=\textwidth]{./imgs/deer-1.png}
+  \caption{DCT con valore di taglio delle frequenze ad 1, in questo modo solo
+    il valore medio non viene eliminato, dal confronto infatti, si può notare
+    come in ogni macroblocco sia la media dell'intensità dei pixel che lo
+    compongono}
+  \label{fig:deer-1}
+\end{figure}
+
+
+\begin{figure}[h]
+  \includegraphics[width=\textwidth]{./imgs/deer-full.png}
+  \caption{DCT con il valore massimo di taglio delle frequenze, si può notare come in questo caso non venga persa informazione in frequenza nell'immagine}
+  \label{fig:deer-full}
+\end{figure}
+
 
 \end{document}
