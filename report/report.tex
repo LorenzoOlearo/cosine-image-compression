@@ -109,7 +109,9 @@ La trasformata DCT2 diretta è stata implementata in Python mentre per la sua
 versione \textit{fast} è stata utilizzata la libreria Python \texttt{fftpack} di
 \texttt{scipy}.
 
-La trasformata DCT che è stata implementata è la DCT di tipo II con riferimento alla seguente definizione:
+Per poter implementare la DCT2 è stato prima necessario implementare la
+trasformata DCT. In questo progetto, è stata implementata la DCT di tipo II con
+riferimento alla seguente definizione:
 
 \begin{equation*}
 	c_k = \alpha_k^N \sum_{i=0}^{N-1} x_i \cos \left(\pi k \frac{2i + 1}{2N} \right), \qquad k=0, \cdots, N-1
